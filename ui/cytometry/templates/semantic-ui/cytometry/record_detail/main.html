@@ -1,0 +1,25 @@
+{% extends "oarepo_ui/record_detail/main.html" %}
+
+{%- set m = d.metadata -%}
+
+{%- block record_title -%}
+<section id="record-title-section" aria-label="{{ _('Record title') }}">
+  <h1 id="record-title" class="wrap-overflowing-text">
+    {{ ui_value(m.title) }}
+  </h1>
+  {% if record_ui["ui"]["creators"] or record_ui["ui"]["contributors"] %}
+    <section id="creatibutors" aria-label="{{ _('Creators and contributors') }}">
+      {%- include "invenio_app_rdm/records/details/creatibutors.html" %}
+    </section>
+  {% endif %}
+</section>
+{%- endblock record_title -%}
+
+{%- block additional_record_details -%}
+  {{ super() }}
+  <section id="cytometry-metadata" class="rel-mt-2" aria-label="{{ _('Cytometry metadata') }}">
+    <h2 id="cytometry-metadata-heading">{{ _('Cytometry metadata') }}</h2>
+    <div class="ui divider"></div>
+    {% include "cytometry/record_detail/cytometry_metadata.html" %}
+  </section>
+{%- endblock additional_record_details -%}

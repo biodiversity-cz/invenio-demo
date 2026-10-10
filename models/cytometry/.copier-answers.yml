@@ -1,0 +1,7 @@
+# Changes here will be overwritten by Copier
+_commit: 6ffb43d
+_src_path: https://github.com/oarepo/nrp-model-copier
+base_model: rdm_complete
+model_description: Model for flow cytometry measurements on plant, animal, microbial
+    or mycological samples.
+model_human_name: Cytometry

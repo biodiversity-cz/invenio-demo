@@ -1,0 +1,301 @@
+# Definition of metadata for cytometry.
+# Domain fields describe cytometry collection records.
+# File attachments (.fcs) are enabled by rdm_complete_preset (record-level
+# files.enabled defaults to true; deposit UI includes the RDM Files section).
+# Do not add a root-level "files:" key here — this file only defines Metadata types.
+
+Taxon:
+  type: object
+  properties:
+    scientific_name:
+      type: keyword
+      required: true
+      label:
+        en: Scientific name
+      help:
+        en: Scientific name of the organism (e.g. Arabidopsis thaliana).
+    strain_cultivar:
+      type: keyword
+      label:
+        en: Strain / cultivar
+      help:
+        en: Designation of the strain, cultivar, line, or specific intraspecific variant.
+    col_id:
+      type: keyword
+      label:
+        en: Catalogue of Life ID
+      help:
+        en: Unique taxon identifier in the Catalogue of Life database.
+    notes:
+      type: fulltext
+      label:
+        en: Taxon notes
+      help:
+        en: Any additional information, notes, or specific details related to this taxon.
+
+SampleLocation:
+  type: object
+  properties:
+    country_or_region:
+      type: keyword
+      label:
+        en: Country or region
+      help:
+        en: Country or larger territory where the sample was collected.
+    locality_description:
+      type: fulltext
+      label:
+        en: Locality description
+      help:
+        en: Verbal description of the sampling site (e.g. field name, habitat type, nearest town).
+    coordinates:
+      type: keyword
+      label:
+        en: Coordinates
+      help:
+        en: Geospatial coordinates of the sampling site (preferably GPS latitude/longitude, but legacy coordinate systems are also allowed).
+
+ProjectInfo:
+  type: object
+  properties:
+    project_title:
+      type: fulltext+keyword
+      label:
+        en: Project title
+      help:
+        en: Official title of the project.
+    project_description:
+      type: fulltext
+      label:
+        en: Project description
+      help:
+        en: Short description, goals, or abstract of the project.
+    authors:
+      type: array
+      label:
+        en: Project authors
+      help:
+        en: List of authors, project investigators, or responsible persons.
+      items:
+        type: keyword
+    publication_doi:
+      type: keyword
+      label:
+        en: Publication DOI
+      help:
+        en: Digital Object Identifier (DOI) of a related scientific publication.
+
+SampleProvenance:
+  type: object
+  properties:
+    taxon:
+      type: array
+      label:
+        en: Taxa
+      help:
+        en: List of taxa present in the sample, supporting mixed communities and strain-level resolution.
+      items:
+        type: Taxon
+    location:
+      type: SampleLocation
+      label:
+        en: Sampling location
+      help:
+        en: Geographical origin of the sample.
+    date_of_sampling:
+      type: edtf
+      label:
+        en: Date of sampling
+      help:
+        en: Date when the biological material was collected. Year (YYYY), year and month (YYYY-MM), or full date (YYYY-MM-DD).
+    collector:
+      type: array
+      label:
+        en: Collector(s)
+      help:
+        en: Names of the person(s) or team who collected the sample.
+      items:
+        type: keyword
+    collection_id:
+      type: keyword
+      label:
+        en: Collection ID
+      help:
+        en: Collection identifier, field notebook number, or internal code for the sample.
+    voucher:
+      type: keyword
+      label:
+        en: Voucher
+      help:
+        en: Reference to a voucher specimen (e.g. herbarium sheet code or museum accession number).
+    material_entity:
+      type: keyword
+      label:
+        en: Material entity
+      help:
+        en: Specific part of the organism or tissue type used (e.g. leaf, blood, cell suspension).
+    specimen_id:
+      type: keyword
+      label:
+        en: Specimen ID
+      help:
+        en: Identifier of the individual organism or specimen from which this sample originates; multiple measurements sharing the same specimen_id can be linked together.
+
+PreparationAndStandard:
+  type: object
+  properties:
+    isolation_buffer:
+      type: keyword
+      label:
+        en: Isolation buffer
+      help:
+        en: Name or chemical composition of the buffer used for nucleus/cell isolation (e.g. Otto buffer).
+    buffer_additives:
+      type: fulltext
+      label:
+        en: Buffer additives
+      help:
+        en: Additional compounds present in the buffer (e.g. PVP, beta-mercaptoethanol, RNase).
+    fluorochrome:
+      type: keyword
+      label:
+        en: Fluorochrome
+      help:
+        en: Fluorochrome dye used for DNA detection (e.g. PI, DAPI).
+    internal_standard_species:
+      type: keyword
+      label:
+        en: Internal standard species
+      help:
+        en: Scientific name of the organism used as the internal reference standard (e.g. Glycine max).
+    internal_standard_material:
+      type: keyword
+      label:
+        en: Internal standard material
+      help:
+        en: Tissue type used as the internal standard (e.g. young leaf).
+    standard_c_value_pg:
+      type: double
+      min_exclusive: 0
+      label:
+        en: Standard C-value (pg)
+      help:
+        en: C-value (genome size) of the internal standard expressed in picograms (pg).
+    standard_c_value_citation:
+      type: fulltext
+      label:
+        en: Standard C-value citation
+      help:
+        en: Citation, reference source, or uncertainty associated with the standard's C-value (e.g. Doležel et al. 2007, ±0.02 pg).
+
+Instrumentation:
+  type: object
+  properties:
+    manufacturer:
+      type: keyword
+      label:
+        en: Manufacturer
+      help:
+        en: Manufacturer of the instrument (e.g. Sysmex, BD Biosciences, Beckman Coulter).
+    model:
+      type: keyword
+      label:
+        en: Model
+      help:
+        en: Specific model designation of the cytometer.
+    instrument_id:
+      type: keyword
+      label:
+        en: Instrument ID
+      help:
+        en: Serial number or internal inventory identifier of the instrument for traceability.
+    light_source:
+      type: keyword
+      label:
+        en: Light source
+      help:
+        en: Type and wavelength of the light source used (e.g. green laser 532 nm).
+
+Measurement:
+  type: object
+  properties:
+    measurer_name:
+      type: array
+      label:
+        en: Measurer name
+      help:
+        en: Name(s) of the operator(s) who physically performed the measurement on the cytometer.
+      items:
+        type: keyword
+    measurement_date:
+      type: edtf
+      label:
+        en: Measurement date
+      help:
+        en: Date when the measurement on the instrument took place. Year (YYYY), year and month (YYYY-MM), or full date (YYYY-MM-DD).
+    purpose:
+      type: fulltext
+      label:
+        en: Purpose
+      help:
+        en: Purpose or objective of this specific measurement (e.g. ploidy determination, genome size estimation, cell cycle analysis).
+    peakSampleToPeakStandard:
+      type: double
+      min_exclusive: 0
+      max_inclusive: 500
+      label:
+        en: Sample peak / standard peak
+      help:
+        en: Ratio of the fluorescence peak position of the sample to the internal standard.
+    interpretation_notes:
+      type: fulltext
+      label:
+        en: Interpretation notes
+      help:
+        en: Notes on histogram interpretation, assessment of measurement quality (CV), or observed deviations.
+
+Metadata:
+  properties:
+    title:
+      type: fulltext+keyword
+      label:
+        en: Title
+      help:
+        en: Title of the record.
+    languages:
+      type: array
+      label:
+        en: Languages
+      items:
+        type: vocabulary
+        vocabulary-type: languages
+    project_info:
+      type: ProjectInfo
+      label:
+        en: Project information
+      help:
+        en: Information about the research project within which the measurements were performed.
+    sample_provenance:
+      type: SampleProvenance
+      label:
+        en: Sample provenance
+      help:
+        en: Origin, collection, and biological characteristics of the analyzed sample.
+    preparation_and_standard:
+      type: PreparationAndStandard
+      label:
+        en: Preparation and standard
+      help:
+        en: Protocol for preparation of the suspension, staining, and internal standard.
+    instrumentation:
+      type: Instrumentation
+      label:
+        en: Instrumentation
+      help:
+        en: Technical parameters and configuration of the flow cytometer.
+    measurement:
+      type: Measurement
+      label:
+        en: Measurement
+      help:
+        en: Details about the performed measurement and the resulting data files.

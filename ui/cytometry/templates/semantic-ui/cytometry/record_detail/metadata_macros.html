@@ -1,0 +1,64 @@
+{# Macros for rendering cytometry metadata on the record detail page. #}
+
+{% macro scalar_row(field) -%}
+  {%- if ui_value(field) -%}
+  <tr>
+    <th class="four wide">{{ field.label(field) }}</th>
+    <td class="twelve wide">{{ ui_value(field) }}</td>
+  </tr>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro array_keywords(field) -%}
+  {%- set items = as_array(field) -%}
+  {%- set api_val = value(field) -%}
+  {%- set names = [] -%}
+  {%- if items -%}
+    {%- for item in items -%}
+      {%- set _ = names.append(ui_value(item)) -%}
+    {%- endfor -%}
+  {%- elif api_val is string and api_val -%}
+    {%- set _ = names.append(api_val) -%}
+  {%- elif api_val is sequence and api_val is not string -%}
+    {%- for entry in api_val -%}
+      {%- if entry is string and entry -%}
+        {%- set _ = names.append(entry) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {# Legacy: string split into single-character array entries #}
+  {%- if names|length > 1 -%}
+    {%- set ns = namespace(all_single=true) -%}
+    {%- for name in names -%}
+      {%- if name|length > 1 -%}
+        {%- set ns.all_single = false -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if ns.all_single and names|join('')|trim -%}
+      {%- set names = [names|join('')|trim] -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if names -%}
+  <tr>
+    <th class="four wide">{{ field.label(field) }}</th>
+    <td class="twelve wide">
+      <ul class="ui list">
+        {%- for name in names -%}
+        <li>{{ name }}</li>
+        {%- endfor -%}
+      </ul>
+    </td>
+  </tr>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro section_table(section) -%}
+  {%- if section -%}
+  <h3 class="ui header rel-mt-2">{{ section.label(section) }}</h3>
+  <table class="ui compact definition table rel-mb-2">
+    <tbody>
+      {{ caller() }}
+    </tbody>
+  </table>
+  {%- endif -%}
+{%- endmacro %}

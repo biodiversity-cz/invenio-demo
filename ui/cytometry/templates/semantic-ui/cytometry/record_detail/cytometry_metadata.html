@@ -1,0 +1,90 @@
+{# Cytometry model metadata (from metadata.yaml), shown below RDM "Additional details". #}
+{% from "cytometry/record_detail/metadata_macros.html" import scalar_row, array_keywords, section_table %}
+
+{%- set pi = m['project_info'] -%}
+{%- if pi -%}
+  {% call section_table(pi) %}
+    {{ scalar_row(pi['project_title']) }}
+    {{ scalar_row(pi['project_description']) }}
+    {{ array_keywords(pi['authors']) }}
+    {{ scalar_row(pi['publication_doi']) }}
+  {% endcall %}
+{%- endif -%}
+
+{%- set sp = m['sample_provenance'] -%}
+{%- if sp -%}
+  {% call section_table(sp) %}
+    {%- set taxa = as_array(sp['taxon']) -%}
+    {%- if taxa -%}
+    <tr>
+      <th class="four wide">{{ sp['taxon'].label(sp['taxon']) }}</th>
+      <td class="twelve wide">
+        {%- for taxon in taxa -%}
+        <table class="ui compact definition table rel-mb-1">
+          <tbody>
+            {{ scalar_row(taxon['scientific_name']) }}
+            {{ scalar_row(taxon['strain_cultivar']) }}
+            {{ scalar_row(taxon['col_id']) }}
+            {{ scalar_row(taxon['notes']) }}
+          </tbody>
+        </table>
+        {%- endfor -%}
+      </td>
+    </tr>
+    {%- endif -%}
+    {%- set loc = sp['location'] -%}
+    {%- if loc and (ui_value(loc['country_or_region']) or ui_value(loc['locality_description']) or ui_value(loc['coordinates'])) -%}
+    <tr>
+      <th class="four wide">{{ sp['location'].label(sp['location']) }}</th>
+      <td class="twelve wide">
+        <table class="ui compact definition table">
+          <tbody>
+            {{ scalar_row(loc['country_or_region']) }}
+            {{ scalar_row(loc['locality_description']) }}
+            {{ scalar_row(loc['coordinates']) }}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    {%- endif -%}
+    {{ scalar_row(sp['date_of_sampling']) }}
+    {{ array_keywords(sp['collector']) }}
+    {{ scalar_row(sp['collection_id']) }}
+    {{ scalar_row(sp['voucher']) }}
+    {{ scalar_row(sp['material_entity']) }}
+    {{ scalar_row(sp['specimen_id']) }}
+  {% endcall %}
+{%- endif -%}
+
+{%- set prep = m['preparation_and_standard'] -%}
+{%- if prep -%}
+  {% call section_table(prep) %}
+    {{ scalar_row(prep['isolation_buffer']) }}
+    {{ scalar_row(prep['buffer_additives']) }}
+    {{ scalar_row(prep['fluorochrome']) }}
+    {{ scalar_row(prep['internal_standard_species']) }}
+    {{ scalar_row(prep['internal_standard_material']) }}
+    {{ scalar_row(prep['standard_c_value_pg']) }}
+  {% endcall %}
+{%- endif -%}
+
+{%- set inst = m['instrumentation'] -%}
+{%- if inst -%}
+  {% call section_table(inst) %}
+    {{ scalar_row(inst['manufacturer']) }}
+    {{ scalar_row(inst['model']) }}
+    {{ scalar_row(inst['instrument_id']) }}
+    {{ scalar_row(inst['light_source']) }}
+  {% endcall %}
+{%- endif -%}
+
+{%- set meas = m['measurement'] -%}
+{%- if meas -%}
+  {% call section_table(meas) %}
+    {{ array_keywords(meas['measurer_name']) }}
+    {{ scalar_row(meas['measurement_date']) }}
+    {{ scalar_row(meas['purpose']) }}
+    {{ scalar_row(meas['fcs_file_name']) }}
+    {{ scalar_row(meas['interpretation_notes']) }}
+  {% endcall %}
+{%- endif -%}
