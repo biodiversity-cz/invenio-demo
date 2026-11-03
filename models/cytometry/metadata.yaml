@@ -1,8 +1,33 @@
-# Definition of metadata for cytometry.
+# Definition of metadata for cytometry (schema contract 0.2).
 # Domain fields describe cytometry collection records.
 # File attachments (.fcs) are enabled by rdm_complete_preset (record-level
 # files.enabled defaults to true; deposit UI includes the RDM Files section).
 # Do not add a root-level "files:" key here — this file only defines Metadata types.
+# Import batch fields schema_version / ark / doi / file_names live outside RDM
+# metadata (PID + files); domain sections below mirror the JSON schema.
+
+Person:
+  type: object
+  properties:
+    fullname:
+      type: keyword
+      required: true
+      label:
+        en: Full name
+      help:
+        en: Full name of the person.
+    orcid:
+      type: keyword
+      label:
+        en: ORCID
+      help:
+        en: ORCID iD in bare form (e.g. 0000-0002-1825-0097).
+    affiliation:
+      type: keyword
+      label:
+        en: Affiliation
+      help:
+        en: Institutional affiliation of the person.
 
 Taxon:
   type: object
@@ -48,60 +73,157 @@ SampleLocation:
         en: Locality description
       help:
         en: Verbal description of the sampling site (e.g. field name, habitat type, nearest town).
-    coordinates:
+    latitude:
+      type: double
+      min_inclusive: -90
+      max_inclusive: 90
+      label:
+        en: Latitude
+      help:
+        en: Geospatial latitude in WGS84 decimal degrees.
+    longitude:
+      type: double
+      min_inclusive: -180
+      max_inclusive: 180
+      label:
+        en: Longitude
+      help:
+        en: Geospatial longitude in WGS84 decimal degrees.
+
+Voucher:
+  type: object
+  properties:
+    institution_code:
       type: keyword
       label:
-        en: Coordinates
+        en: Institution code
       help:
-        en: Geospatial coordinates of the sampling site (preferably GPS latitude/longitude, but legacy coordinate systems are also allowed).
+        en: Code of holding institution or herbarium (e.g. PRC).
+    catalog_number:
+      type: keyword
+      label:
+        en: Catalog number
+      help:
+        en: Catalogue or accession number of the voucher.
+    pid:
+      type: keyword
+      label:
+        en: Persistent identifier
+      help:
+        en: Persistent identifier of the voucher (URI, DOI, or ARK).
+
+SamplePeak:
+  type: object
+  properties:
+    peak_position:
+      type: double
+      required: true
+      min_exclusive: 0
+      label:
+        en: Peak position
+      help:
+        en: Sample peak position on the fluorescence axis (native FCS units/channel).
+    peak_sample_to_peak_standard:
+      type: double
+      min_exclusive: 0
+      label:
+        en: Sample peak / standard peak
+      help:
+        en: Fluorescence ratio of the sample peak to the internal standard peak.
+    peak_description:
+      type: keyword
+      label:
+        en: Peak description
+      help:
+        en: What the peak represents (e.g. 2C G1 phase, 4C G2 phase).
 
 ProjectInfo:
   type: object
   properties:
     project_title:
       type: fulltext+keyword
+      required: true
       label:
         en: Project title
       help:
-        en: Official title of the project.
+        en: Official title of the project or dataset.
     project_description:
       type: fulltext
+      required: true
       label:
         en: Project description
       help:
-        en: Short description, goals, or abstract of the project.
+        en: Short description, goals, or abstract of the project (max ~200 words).
     authors:
       type: array
+      required: true
       label:
         en: Project authors
       help:
         en: List of authors, project investigators, or responsible persons.
       items:
-        type: keyword
+        type: Person
     publication_doi:
-      type: keyword
+      type: array
       label:
         en: Publication DOI
       help:
-        en: Digital Object Identifier (DOI) of a related scientific publication.
+        en: DOIs of related scientific publications (bare form, e.g. 10.1234/abcd).
+      items:
+        type: keyword
+    funding:
+      type: fulltext
+      label:
+        en: Funding
+      help:
+        en: Funding agency and grant number or details (e.g. GAČR 24-12345S).
 
 SampleProvenance:
   type: object
   properties:
+    specimen_id:
+      type: keyword
+      label:
+        en: Specimen ID
+      help:
+        en: Identifier of the individual organism or parent specimen; multiple measurements sharing the same specimen_id can be linked together.
+    sample_number:
+      type: keyword
+      label:
+        en: Sample number
+      help:
+        en: Identifier of the specific isolated sample or aliquot (e.g. egg #1 from a given specimen).
     taxon:
       type: array
+      required: true
       label:
         en: Taxa
       help:
         en: List of taxa present in the sample, supporting mixed communities and strain-level resolution.
       items:
         type: Taxon
-    location:
-      type: SampleLocation
+    material_type:
+      type: keyword
+      required: true
       label:
-        en: Sampling location
+        en: Material type
       help:
-        en: Geographical origin of the sample.
+        en: Preservation state or type of material (living, herbarium, silica_gel, frozen, ethanol, other).
+    organ:
+      type: keyword
+      required: true
+      label:
+        en: Organ / tissue
+      help:
+        en: Organ or tissue analyzed (e.g. leaf, flower, seed, embryo, endosperm).
+    individuals_count:
+      type: int
+      required: true
+      min_inclusive: 1
+      label:
+        en: Individuals count
+      help:
+        en: Number of pooled individuals in the sample (1 = single individual, >1 = pooled).
     date_of_sampling:
       type: edtf
       label:
@@ -113,33 +235,29 @@ SampleProvenance:
       label:
         en: Collector(s)
       help:
-        en: Names of the person(s) or team who collected the sample.
+        en: Person(s) who collected the sample.
       items:
-        type: keyword
-    collection_id:
+        type: Person
+    collector_team:
       type: keyword
       label:
-        en: Collection ID
+        en: Collector team
       help:
-        en: Collection identifier, field notebook number, or internal code for the sample.
-    voucher:
-      type: keyword
+        en: Team, group, or institution responsible for collection.
+    location:
+      type: SampleLocation
       label:
-        en: Voucher
+        en: Sampling location
       help:
-        en: Reference to a voucher specimen (e.g. herbarium sheet code or museum accession number).
-    material_entity:
-      type: keyword
+        en: Geographical origin of the sample.
+    vouchers:
+      type: array
       label:
-        en: Material entity
+        en: Vouchers
       help:
-        en: Specific part of the organism or tissue type used (e.g. leaf, blood, cell suspension).
-    specimen_id:
-      type: keyword
-      label:
-        en: Specimen ID
-      help:
-        en: Identifier of the individual organism or specimen from which this sample originates; multiple measurements sharing the same specimen_id can be linked together.
+        en: Voucher specimens or preserved reference material.
+      items:
+        type: Voucher
 
 PreparationAndStandard:
   type: object
@@ -149,15 +267,16 @@ PreparationAndStandard:
       label:
         en: Isolation buffer
       help:
-        en: Name or chemical composition of the buffer used for nucleus/cell isolation (e.g. Otto buffer).
+        en: Name or chemical composition of the buffer used for nucleus/cell isolation (e.g. Otto I + Otto II).
     buffer_additives:
       type: fulltext
       label:
         en: Buffer additives
       help:
-        en: Additional compounds present in the buffer (e.g. PVP, beta-mercaptoethanol, RNase).
+        en: Buffer additives and other modifications not covered by the isolation-buffer vocabulary (e.g. PVP, beta-mercaptoethanol, RNase).
     fluorochrome:
       type: keyword
+      required: true
       label:
         en: Fluorochrome
       help:
@@ -167,7 +286,7 @@ PreparationAndStandard:
       label:
         en: Internal standard species
       help:
-        en: Scientific name of the organism used as the internal reference standard (e.g. Glycine max).
+        en: Scientific name and cultivar/var. of the internal reference standard (e.g. Glycine max 'Polanka'). Required when an internal standard was used.
     internal_standard_material:
       type: keyword
       label:
@@ -180,17 +299,24 @@ PreparationAndStandard:
       label:
         en: Standard C-value (pg)
       help:
-        en: C-value (genome size) of the internal standard expressed in picograms (pg).
+        en: 2C-value (genome size) of the internal standard expressed in picograms (pg).
     standard_c_value_citation:
       type: fulltext
       label:
         en: Standard C-value citation
       help:
-        en: Citation, reference source, or uncertainty associated with the standard's C-value (e.g. Doležel et al. 2007, ±0.02 pg).
+        en: Citation or reference DOI for the standard's 2C-value.
 
 Instrumentation:
   type: object
   properties:
+    instrument_affiliation:
+      type: keyword
+      required: true
+      label:
+        en: Instrument affiliation
+      help:
+        en: Institution or laboratory housing the cytometer.
     manufacturer:
       type: keyword
       label:
@@ -199,10 +325,11 @@ Instrumentation:
         en: Manufacturer of the instrument (e.g. Sysmex, BD Biosciences, Beckman Coulter).
     model:
       type: keyword
+      required: true
       label:
         en: Model
       help:
-        en: Specific model designation of the cytometer.
+        en: Specific model designation of the cytometer (e.g. CyFlow Space).
     instrument_id:
       type: keyword
       label:
@@ -211,22 +338,27 @@ Instrumentation:
         en: Serial number or internal inventory identifier of the instrument for traceability.
     light_source:
       type: keyword
+      required: true
       label:
         en: Light source
       help:
         en: Type and wavelength of the light source used (e.g. green laser 532 nm).
+    channel_name_standard_position:
+      type: keyword
+      label:
+        en: Channel name (standard position)
+      help:
+        en: Detection channel name used for fluorescence standard position measurement.
 
 Measurement:
   type: object
   properties:
-    measurer_name:
-      type: array
+    measurer:
+      type: Person
       label:
-        en: Measurer name
+        en: Measurer
       help:
-        en: Name(s) of the operator(s) who physically performed the measurement on the cytometer.
-      items:
-        type: keyword
+        en: Operator who performed the cytometric measurement.
     measurement_date:
       type: edtf
       label:
@@ -239,14 +371,29 @@ Measurement:
         en: Purpose
       help:
         en: Purpose or objective of this specific measurement (e.g. ploidy determination, genome size estimation, cell cycle analysis).
-    peakSampleToPeakStandard:
+    internal_standard_used:
+      type: boolean
+      required: true
+      label:
+        en: Internal standard used
+      help:
+        en: Whether an internal reference standard was used in this run.
+    standard_peak_position:
       type: double
       min_exclusive: 0
-      max_inclusive: 500
       label:
-        en: Sample peak / standard peak
+        en: Standard peak position
       help:
-        en: Ratio of the fluorescence peak position of the sample to the internal standard.
+        en: Position of the internal standard G1 peak on the fluorescence axis. Required when an internal standard was used; must be omitted when it was not.
+    sample_peaks:
+      type: array
+      required: true
+      label:
+        en: Sample peaks
+      help:
+        en: Sample histogram peaks. Each peak must have a peak_position; ratio to standard is optional per peak.
+      items:
+        type: SamplePeak
     interpretation_notes:
       type: fulltext
       label:
@@ -271,31 +418,36 @@ Metadata:
         vocabulary-type: languages
     project_info:
       type: ProjectInfo
+      required: true
       label:
         en: Project information
       help:
         en: Information about the research project within which the measurements were performed.
     sample_provenance:
       type: SampleProvenance
+      required: true
       label:
         en: Sample provenance
       help:
         en: Origin, collection, and biological characteristics of the analyzed sample.
     preparation_and_standard:
       type: PreparationAndStandard
+      required: true
       label:
         en: Preparation and standard
       help:
         en: Protocol for preparation of the suspension, staining, and internal standard.
     instrumentation:
       type: Instrumentation
+      required: true
       label:
         en: Instrumentation
       help:
         en: Technical parameters and configuration of the flow cytometer.
     measurement:
       type: Measurement
+      required: true
       label:
         en: Measurement
       help:
-        en: Details about the performed measurement and the resulting data files.
+        en: Details about the performed measurement and the resulting histogram peaks.

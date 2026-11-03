@@ -1,7 +1,7 @@
 {# Macros for rendering cytometry metadata on the record detail page. #}
 
 {% macro scalar_row(field) -%}
-  {%- if ui_value(field) -%}
+  {%- if ui_value(field) is not none and ui_value(field) != '' -%}
   <tr>
     <th class="four wide">{{ field.label(field) }}</th>
     <td class="twelve wide">{{ ui_value(field) }}</td>
@@ -26,18 +26,6 @@
       {%- endif -%}
     {%- endfor -%}
   {%- endif -%}
-  {# Legacy: string split into single-character array entries #}
-  {%- if names|length > 1 -%}
-    {%- set ns = namespace(all_single=true) -%}
-    {%- for name in names -%}
-      {%- if name|length > 1 -%}
-        {%- set ns.all_single = false -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- if ns.all_single and names|join('')|trim -%}
-      {%- set names = [names|join('')|trim] -%}
-    {%- endif -%}
-  {%- endif -%}
   {%- if names -%}
   <tr>
     <th class="four wide">{{ field.label(field) }}</th>
@@ -45,6 +33,31 @@
       <ul class="ui list">
         {%- for name in names -%}
         <li>{{ name }}</li>
+        {%- endfor -%}
+      </ul>
+    </td>
+  </tr>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro person_list(field) -%}
+  {%- set people = as_array(field) -%}
+  {%- if people -%}
+  <tr>
+    <th class="four wide">{{ field.label(field) }}</th>
+    <td class="twelve wide">
+      <ul class="ui list">
+        {%- for person in people -%}
+          {%- set fullname = ui_value(person['fullname']) if person['fullname'] is defined else none -%}
+          {%- set orcid = ui_value(person['orcid']) if person['orcid'] is defined else none -%}
+          {%- set affiliation = ui_value(person['affiliation']) if person['affiliation'] is defined else none -%}
+          {%- if fullname or orcid or affiliation -%}
+          <li>
+            {%- if fullname -%}{{ fullname }}{%- endif -%}
+            {%- if orcid -%}{% if fullname %} · {% endif %}ORCID {{ orcid }}{%- endif -%}
+            {%- if affiliation -%}{% if fullname or orcid %} · {% endif %}{{ affiliation }}{%- endif -%}
+          </li>
+          {%- endif -%}
         {%- endfor -%}
       </ul>
     </td>

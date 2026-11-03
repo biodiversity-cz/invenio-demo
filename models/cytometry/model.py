@@ -7,16 +7,12 @@ from invenio_i18n import lazy_gettext as _
 from oarepo_communities.model.presets import communities_preset
 from oarepo_model.api import model
 from oarepo_model.customizations import AddMetadataExport
-from oarepo_model.customizations.high_level.add_service_component import (
-    AddServiceComponent,
-)
 from oarepo_model.datatypes.registry import from_yaml
 from oarepo_rdm.model.presets import rdm_complete_preset
 from oarepo_requests.model.presets.requests import requests_preset
 from oarepo_workflows.model.presets import workflows_preset
 
 from .serializers import DataCiteJSONSerializer
-from .service_components import MeasurerNameCompatComponent
 
 # TODO: Consider letting users add an image/icon for the model,
 # so that the deposit model selection page is more visually appealing.
@@ -54,7 +50,6 @@ cytometry_model = model(
             mimetype="application/vnd.datacite.datacite+json",
             serializer=DataCiteJSONSerializer()
         ),
-        AddServiceComponent(MeasurerNameCompatComponent),
     ],
     configuration={
         "ui_blueprint_name": "cytometry_ui"

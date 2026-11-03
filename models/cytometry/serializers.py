@@ -58,11 +58,20 @@ class DataCiteJSONSerializer(MarshmallowSerializer):
         place_parts = [
             location.get("locality_description"),
             location.get("country_or_region"),
-            location.get("coordinates"),
         ]
         place = ", ".join(part for part in place_parts if part)
+        geo = {}
         if place:
-            data["geoLocations"] = [{"geoLocationPlace": place}]
+            geo["geoLocationPlace"] = place
+        lat = location.get("latitude")
+        lon = location.get("longitude")
+        if lat is not None and lon is not None:
+            geo["geoLocationPoint"] = {
+                "pointLatitude": lat,
+                "pointLongitude": lon,
+            }
+        if geo:
+            data["geoLocations"] = [geo]
 
         subjects = list(data.get("subjects") or [])
         for taxon in (metadata.get("sample_provenance") or {}).get("taxon") or []:

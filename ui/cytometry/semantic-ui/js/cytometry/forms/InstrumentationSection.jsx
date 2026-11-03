@@ -8,12 +8,18 @@ export const InstrumentationSection = {
   component: () => (
     <>
       <TextField
+        fieldPath="metadata.instrumentation.instrument_affiliation"
+        label={i18next.t("Instrument affiliation")}
+        required
+      />
+      <TextField
         fieldPath="metadata.instrumentation.manufacturer"
         label={i18next.t("Manufacturer")}
       />
       <TextField
         fieldPath="metadata.instrumentation.model"
         label={i18next.t("Model")}
+        required
       />
       <TextField
         fieldPath="metadata.instrumentation.instrument_id"
@@ -22,13 +28,20 @@ export const InstrumentationSection = {
       <TextField
         fieldPath="metadata.instrumentation.light_source"
         label={i18next.t("Light source")}
+        required
+      />
+      <TextField
+        fieldPath="metadata.instrumentation.channel_name_standard_position"
+        label={i18next.t("Channel name (standard position)")}
       />
     </>
   ),
   includesPaths: [
+    "metadata.instrumentation.instrument_affiliation",
     "metadata.instrumentation.manufacturer",
     "metadata.instrumentation.model",
     "metadata.instrumentation.instrument_id",
     "metadata.instrumentation.light_source",
+    "metadata.instrumentation.channel_name_standard_position",
   ],
 };

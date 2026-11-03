@@ -19,6 +19,7 @@ export const PreparationSection = {
       <TextField
         fieldPath="metadata.preparation_and_standard.fluorochrome"
         label={i18next.t("Fluorochrome")}
+        required
       />
       <TextField
         fieldPath="metadata.preparation_and_standard.internal_standard_species"
